@@ -9,6 +9,12 @@ BikeDisplay::BikeDisplay(LiquidCrystal_I2C *disp) {
     activeTime = 0;
 }
 
+void BikeDisplay::init() {
+    lcd->init();
+    lcd->begin(16, 2);
+    lcd->backlight();
+}
+
 void BikeDisplay::setCurrentSpeed(float speed) {
     currentSpeed = speed;
 }

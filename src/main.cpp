@@ -1,40 +1,37 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
 
 #include "display.h"
+#include "gps.h"
+#include "config.h"
 
-LiquidCrystal_I2C lcd(0x27, 20, 4);
-BikeDisplay display(&lcd);
-int runs = 0;
+BikeDisplay display(new LiquidCrystal_I2C(LC_ADDR, 20, 4));
+GPSTracker gps(new SoftwareSerial(PIN_GPS_RX, PIN_GPS_TX), GPS_BAUDRATE);
 
 void readGps();
 
 void setup() {
     randomSeed(analogRead(0));
-
     delay(1000);
+
     Serial.begin(9600);
     while (!Serial);
 
-    Serial.write("Program started.\n");
+    Serial.write("Initializing program ...\n");
 
-    lcd.init();
-    lcd.begin(16, 2);
-    lcd.backlight();
+    display.init();
+    gps.init();
+
+    display.setStatus(BikeDisplay::WAITING_GPS);
 }
 
 void loop() {
-    runs++;
-    Serial.print("Program running ... ");
-    Serial.print(runs);
-    Serial.print("\n");
-    Serial.flush();
-
     readGps();
     display.render();
 
-    delay(1000 - (millis() % 1000));
+    gps.delay(1000 - (millis() % 1000));
 }
 
 void readGps() {
